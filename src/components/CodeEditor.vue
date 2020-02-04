@@ -1,67 +1,51 @@
 <template>
   <div class="code-editor-container">
-    <div>
-      <button @click="toggleTxt">sdfsd</button>
-    </div>
     <div class="txt-wrapper">
       <textarea
         class="txt original"
         v-model="sourceCode"
         spellcheck="false"
         ref="txt"
-        @keyup="onTxtInput"
+        @input="onTxtInput"
       />
     </div>
-    <pre>
-      <div class="txt visualizer" v-html="sourceCodeWithBr"></div>
-    </pre>
+    <pre><code class="txt visualizer" v-html="sourceCodeHighlighted" /></pre>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 
-declare global {
-  interface HTMLTextAreaElement {
-    insertAtCaret(text: string): void;
-  }
+function injectString(source: string, inject: string, pos: number): string {
+  return (
+    source.substring(0, pos) + inject + source.substring(pos, source.length)
+  );
 }
-
-HTMLTextAreaElement.prototype.insertAtCaret = function(text: string) {
-  text = text || "";
-  if (this.selectionStart || this.selectionStart === 0) {
-    // Others
-    const startPos = this.selectionStart;
-    const endPos = this.selectionEnd;
-    this.value =
-      this.value.substring(0, startPos) +
-      text +
-      this.value.substring(endPos, this.value.length);
-    this.selectionStart = startPos + text.length;
-    this.selectionEnd = startPos + text.length;
-  } else {
-    this.value += text;
-  }
-};
 
 @Component
 export default class CodeEditor extends Vue {
   $refs!: { txt: HTMLTextAreaElement };
   sourceCode: string = "some text";
   onTxtInput(event: any) {
-    if (event.key === "{") {
-      this.$refs.txt.insertAtCaret("\n\n}");
+    if (event.data === "{") {
+      this.pairBracketsWithNewLineAndIndent();
     }
-    console.log(event);
   }
-  toggleTxt() {}
 
-  get sourceCodeWithBr(): string {
-    return this.sourceCodeHighlighted.replace(/\n/g, "<br/>");
+  pairBracketsWithNewLineAndIndent(): void {
+    const textToInsert = "\n   \n}";
+    const pos = this.$refs.txt.selectionStart;
+    this.sourceCode = injectString(this.sourceCode, textToInsert, pos);
+    this.$nextTick(() => {
+      this.gotoPos(pos + 4);
+    });
   }
-  get sourceInLines(): string[] {
-    return this.sourceCode.split("\n");
+
+  gotoPos(pos: number): void {
+    this.$refs.txt.selectionStart = pos;
+    this.$refs.txt.selectionEnd = pos;
   }
+
   get sourceCodeHighlighted(): string {
     return this.sourceCode.replace(/var/g, "<span class='var'>var</span>");
   }
@@ -69,9 +53,6 @@ export default class CodeEditor extends Vue {
 </script>
 
 <style lang="stylus">
-.code-editor-container
-  /*display flex*/
-
 .txt
   width 500px
   height 500px
@@ -92,7 +73,7 @@ export default class CodeEditor extends Vue {
 
 .visualizer
   position absolute
-  top 20px
+  top 0
   left 0
   z-index -1
 .var

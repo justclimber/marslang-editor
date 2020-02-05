@@ -9,15 +9,14 @@ import { Component, Vue } from "vue-property-decorator";
 import CodeEditor from "./components/CodeEditor.vue";
 
 @Component({
-  components: {
-    CodeEditor
-  }
+  components: { CodeEditor }
 })
 export default class App extends Vue {}
 </script>
 
 <style lang="stylus">
 body
+pre
   margin 0
   padding 0
 #app

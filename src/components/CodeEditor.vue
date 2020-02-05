@@ -10,11 +10,15 @@
       />
     </div>
     <pre><code class="txt visualizer" v-html="sourceCodeHighlighted" /></pre>
+    <div class="txt">
+      <Statement v-for="(row, i) in sourceByLines" :key="i" :text="row" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import Statement from "@/components/Statement.vue";
 
 function injectString(source: string, inject: string, pos: number): string {
   return (
@@ -22,7 +26,9 @@ function injectString(source: string, inject: string, pos: number): string {
   );
 }
 
-@Component
+@Component({
+  components: { Statement, CodeEditor }
+})
 export default class CodeEditor extends Vue {
   $refs!: { txt: HTMLTextAreaElement };
   sourceCode: string = "some text";
@@ -46,6 +52,9 @@ export default class CodeEditor extends Vue {
     this.$refs.txt.selectionEnd = pos;
   }
 
+  get sourceByLines(): string[] {
+    return this.sourceCode.split("\n");
+  }
   get sourceCodeHighlighted(): string {
     return this.sourceCode.replace(/var/g, "<span class='var'>var</span>");
   }
@@ -55,7 +64,7 @@ export default class CodeEditor extends Vue {
 <style lang="stylus">
 .txt
   width 500px
-  height 500px
+  height 200px
   border 1px solid grey
   margin 0
   padding 0

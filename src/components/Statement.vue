@@ -9,7 +9,7 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class Statement extends Vue {
-  @Prop(String) text: string = "";
+  @Prop(String) text: string | undefined;
 }
 </script>
 

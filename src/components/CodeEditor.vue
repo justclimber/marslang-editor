@@ -27,7 +27,7 @@ function injectString(source: string, inject: string, pos: number): string {
 }
 
 @Component({
-  components: { Statement, CodeEditor }
+  components: { Statement }
 })
 export default class CodeEditor extends Vue {
   $refs!: { txt: HTMLTextAreaElement };
